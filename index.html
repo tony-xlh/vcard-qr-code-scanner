@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>vCard Scanner</title>
   <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@10.4.2000/dist/dbr.bundle.js"></script>
+  <script type="text/javascript" src="vcf.js"></script>
   <style>
   h2 {
     text-align: center;
@@ -92,8 +93,28 @@
       if (result.barcodeResultItems.length > 0) {
         let container = document.getElementById("result");
         let item = result.barcodeResultItems[0];
-        container.innerText = `${item.formatString}: ${item.text}`;
+        container.innerText = formatedContactInfo(item.text);
       }
+    }
+
+    function formatedContactInfo(barcodeText) {
+      let parsed = parse(barcodeText);
+      let presetKeys = {"fn":"Full name","org":"Orgnization","title":"Job Title","url":"URL","tel":"Tel","email":"Email"};
+      let str = "";
+      for (let index = 0; index < Object.keys(presetKeys).length; index++) {
+        const key = Object.keys(presetKeys)[index];
+        const value = presetKeys[key];
+        if (key in parsed) {
+          let appendedValue = "";
+          let valueArray = parsed[key];
+          valueArray.forEach(valueObject => {
+            appendedValue = appendedValue + valueObject.value + "\n";
+          });
+          str = str + value + ": " +appendedValue.trim() + "\n";
+        }
+      }
+      console.log(parsed);
+      return str;
     }
 
     async function toggleScanning() {
