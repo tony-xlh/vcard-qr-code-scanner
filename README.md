@@ -6,3 +6,5 @@ Libraries used:
 
 * [vCard Parser](https://github.com/Heymdall/vcard)
 * [Dynamsoft Barcode Reader](https://www.dynamsoft.com/barcode-reader/overview/)
+
+[Online demo](https://tony-xlh.github.io/vcard-qr-code-scanner/)
