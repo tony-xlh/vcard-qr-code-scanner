@@ -32,12 +32,24 @@
     <div id="status">Loading...</div>
     <div id="cameraView"></div>
     <div id="result"></div>
+    <div class="buttons" hidden>
+      <button id="downloadBtn">Download</button>
+      <button id="shareBtn">Share</button>
+    </div>
   </div>
   <script>
     let cvRouter;
     let cameraEnhancer;
     let initialized = false;
     let templateName = "ReadSingleBarcode";
+    let vCardContent = "";
+    
+    document.getElementById("downloadBtn").addEventListener("click",function(){
+      downloadText();
+    });
+    document.getElementById("shareBtn").addEventListener("click",function(){
+      share();
+    });
     document.getElementById("startScanBtn").addEventListener("click",function(){
       if (initialized) {
         toggleScanning();
@@ -63,6 +75,18 @@
     
     window.onload = function(){
       initBarcodeScanner();
+    }
+
+    function downloadText(){
+      let filename = 'scanned.vcf';
+      let link = document.createElement('a');
+      link.style.display = 'none';
+      link.setAttribute('target', '_blank');
+      link.setAttribute('href', 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vCardContent));
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     async function initBarcodeScanner(){
@@ -115,10 +139,31 @@
           }
         }
         console.log(parsed);
+        vCardContent = barcodeText;
+        document.getElementsByClassName("buttons")[0].removeAttribute("hidden");
         return str;
       } catch (error) {
         console.log(error);
         return "Invalid vCard."
+      }
+    }
+
+    function share(){
+      var file = new File([vCardContent], "scanned.vcf", {type: 'text/vcard'});
+      var filesArray = [file];
+      var shareData = { files: filesArray };
+
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        // Adding title afterwards as navigator.canShare just
+        // takes files as input
+        shareData.title = "vcard";
+
+        navigator.share(shareData)
+        .then(() => console.log('Share was successful.'))
+        .catch((error) => alert('Sharing failed: '+error));
+
+      } else {
+        console.log("Your system doesn't support sharing files.");
       }
     }
 
